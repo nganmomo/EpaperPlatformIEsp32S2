@@ -125,7 +125,7 @@ Paint Renderer::notesPage(String title, String content){
     return paint;
 }
 
-bool Renderer::splitStringBy(String raw, String * parameters, int paraSize, char deliminater){
+void Renderer::splitStringBy(String raw, String * parameters, int paraSize, char deliminater){
     uint8_t lastIndex = 0;
     uint8_t count = 0;
     if(raw[raw.length()-1] != deliminater){

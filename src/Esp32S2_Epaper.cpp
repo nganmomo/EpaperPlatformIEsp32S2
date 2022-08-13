@@ -1,8 +1,8 @@
 #include <Arduino.h>
-//			            _____[]_____
-//			       VIN|     		 |GND
-//		          PA03|  		     |RST
-//		           GND|	    	  D0 |PA11 D3
+//			               _____[]_____
+//			           VIN|     		   |GND
+//		            PA03|  		       |RST
+//		             GND|	    	  D0 |PA11 D3
 //	               3V3|		      D1 |PA10 D2
 //	A1      D16   PB02|		      D2 |PA08 D11  MOSI
 //	A4	    D19   PA05|		      D3 |PA09 D12  SCK
@@ -13,8 +13,19 @@
 //SCL *SCK	D9    PA17|		         |PA06 D20  CS2
 //	  MISO	D10   PA19|		         |PA07 D21
 //SDA *MOSI	D8    PA16|		         |PA23 D1
-//      	D24   PA18|		         |PA20 D0
-//	        	      |__MRK PINOUT__|
+//      		D24   PA18|		         |PA20 D0
+//	        		      |_MRK PINOUT_|
+//SERcom1 for debug
+//			            _____[]_____
+//KEY1  DAC  A0  D0|            |5V
+//KEY2	     A1  D1|    		    |GND
+//KEY3	     A2  D2|      	    |3V3
+//*CS	       A3  D3|	          |D10 A10  *MOSI 
+//*CS2  SDA  A4  D4|	          |D9  A9   *MISO   
+//*BUSY SCL  A5	 D5|	          |D8  A8   *SCK
+//*RES  TX   D18 D6|____XIAO____|D7  A7   RX     *DC
+//                    
+//See parasetup.h for pin assign //
 
 #include "parasetup.h"
 #include <SPI.h>
@@ -25,7 +36,8 @@
 #include "renderer.h"	
 
 unsigned char image[4000];
-//This is contained in rendererg
+void SplitStringBy(String raw, String * parameters, int paraSize, char deliminater);
+//This is contained in renderer
 
 char linetext[8][22];
 
@@ -223,7 +235,7 @@ String DrawFilesPage(String directories, int & selected, int & viewPortStart){
     return current;
 }
 
-bool SplitStringBy(String raw, String * parameters, int paraSize, char deliminater){
+void SplitStringBy(String raw, String * parameters, int paraSize, char deliminater){
     uint8_t lastIndex = 0;
     uint8_t count = 0;
     if(raw[raw.length()-1] != deliminater){

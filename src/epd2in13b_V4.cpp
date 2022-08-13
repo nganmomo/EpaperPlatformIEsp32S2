@@ -33,6 +33,8 @@ Epd::~Epd() {
 };
 
 Epd::Epd() {
+    sck_pin=SCK_PIN;
+    mosi_pin = MOSI_PIN;
     reset_pin = RST_PIN;
     dc_pin = DC_PIN;
     cs_pin = CS_PIN;
@@ -144,20 +146,47 @@ int Epd::Init(char Mode) {
 	return 0;
 }
 
+void Epd::WriteByte(UBYTE data)
+{
+    //SPI.beginTransaction(spi_settings);
+    digitalWrite(cs_pin, LOW);
+
+    for (int i = 0; i < 8; i++)
+    {
+        if ((data & 0x80) == 0) digitalWrite(MOSI_PIN, LOW); 
+        else                    digitalWrite(MOSI_PIN, HIGH);
+
+        data <<= 1;
+        digitalWrite(sck_pin, HIGH);     
+        digitalWrite(sck_pin, LOW);
+    }
+
+    //SPI.transfer(data);
+    digitalWrite(cs_pin, HIGH);
+    //SPI.endTransaction();	
+}
 /**
  *  @brief: basic function for sending commands
  */
 void Epd::SendCommand(unsigned char command) {
     DigitalWrite(dc_pin, LOW);
-    SpiTransfer(command);
+    DigitalWrite(cs_pin, LOW);
+    WriteByte(command);     
+    DigitalWrite(cs_pin, HIGH);   
+    //DigitalWrite(dc_pin, LOW);
+    //SpiTransfer(command);
 }
 
 /**
  *  @brief: basic function for sending data
  */
 void Epd::SendData(unsigned char data) {
-    DigitalWrite(dc_pin, HIGH);
-    SpiTransfer(data);
+    DigitalWrite(dc_pin,HIGH);
+    DigitalWrite(cs_pin,LOW);
+    WriteByte(data);
+    DigitalWrite(cs_pin,HIGH);
+    //DigitalWrite(dc_pin, HIGH);
+    //SpiTransfer(data);
 }
 
 /**

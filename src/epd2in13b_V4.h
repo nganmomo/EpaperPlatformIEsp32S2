@@ -85,6 +85,7 @@ public:
 	int Init(char Mode);  
     void SendCommand(unsigned char command);
     void SendData(unsigned char data);
+    void WriteByte(unsigned char data);
     void WaitUntilIdle(void);
     void Lut(const unsigned char *lut);
     void Reset(void);
@@ -107,6 +108,8 @@ public:
     );//Author: Leo Yan
 
 private:
+    unsigned int sck_pin;
+    unsigned int mosi_pin;
     unsigned int reset_pin;
     unsigned int dc_pin;
     unsigned int cs_pin;

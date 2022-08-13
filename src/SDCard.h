@@ -3,7 +3,11 @@
 #ifndef SD_CARD
 #define SD_CARD
 
-#include "SdFat.h"
+//#include "SdFat.h"
+#include <FFat.h>
+#include "FS.h"
+#include "SD.h"
+#include "SPI.h"
 #include "parasetup.h"
 //#include "Arduino_AVRSTL.h"
 
@@ -25,7 +29,7 @@ public:
     bool isFile(String dirName);
     String readFile(String dirName, int startLine, int endLine);
 private:
-    SdFat SD;
+    //SdFat SD;
     int SD_CS_PIN = sdcardcs;
     int MAX_CHAR = 25;
     char fileReadBuffer[50];

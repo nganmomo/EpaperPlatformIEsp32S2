@@ -25,7 +25,7 @@ public:
     Paint filesPage(String directories, int selected);
     Paint notesPage(String content);
     Paint notesPage(String title, String content);
-    bool splitStringBy(String raw, String * parameters, int paraSize, char deliminater);
+    void splitStringBy(String raw, String * parameters, int paraSize, char deliminater);
     
     unsigned char image[4000/4 + 50];
 private:

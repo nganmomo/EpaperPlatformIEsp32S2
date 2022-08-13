@@ -8,7 +8,7 @@
 
 #ifndef PARASETUP_H_
 #define PARASETUP_H_
-#define XIAO
+//#define XIAO
 
 #ifdef	XIAO
 #define KEY1			0
@@ -18,16 +18,29 @@
 #define DC_PIN          7		
 #define CS_PIN          3		
 #define BUSY_PIN        5
-#define sdcardcs		 4
-#else
+#define sdcardcs		4
+#else		//esp8266
 #define KEY1			33
 #define KEY2			32
-#define KEY3			15
-#define RST_PIN         6		
-#define DC_PIN          29		
-#define CS_PIN          28		
-#define BUSY_PIN        7
-#define sdcardcs		20
+#define KEY3			35
+
+#define SCK_PIN  		13
+#define MOSI_PIN 		14
+#define CS_PIN          15	
+#define RST_PIN         26		
+#define DC_PIN          27			
+#define BUSY_PIN        25
+
+//#define sdcardsck		4
+//#define sdcardmiso	16
+//#define sdcardmosi	17
+//#define sdcardcs		2
+
+#define sdcardsck		18
+#define sdcardmiso		19
+#define sdcardmosi		23
+#define sdcardcs		5
+
 #endif
 
 #define ROTATE_0        0

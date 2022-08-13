@@ -5,7 +5,9 @@ SDCard::SDCard(int cspin){
     SD_CS_PIN = cspin;
 }
 bool SDCard::initialize(){
-    if(!SD.begin(SD_CS_PIN)){
+    
+    //if(!SD.begin(SD_CS_PIN)){
+    if(!SD.begin(sdcardsck,sdcardmiso,sdcardmosi,sdcardcs)){
         return false;
     }else{
         currentFile = SD.open("/");
@@ -70,9 +72,10 @@ bool SDCard::deleteFile(String fileName){
     }
 }
 String SDCard::getFileName(File file){
-    char FILE_NAME[MAX_CHAR];
-    file.getName(FILE_NAME, MAX_CHAR);
-    return String(FILE_NAME);
+    //char FILE_NAME[MAX_CHAR];    
+    //file.getName(FILE_NAME, MAX_CHAR);          
+    //return String(FILE_NAME);
+    return file.name();   
 }
 String SDCard::ListDirectory() {
     String temp = "..\n";
@@ -188,6 +191,7 @@ bool SDCard::enter(String dirName){
         //Serial.println(" Open Successful");
         ;
     }
+    return true;//??
 }
 bool SDCard::isFile(){
     bool isDir = currentFile.isDirectory();
@@ -235,7 +239,8 @@ String SDCard::readFile(String dirName, int startLine, int endLine){
         if(results != ""){
             results += "\n";
         }
-        int n = tempFile.fgets(fileReadBuffer, sizeof(fileReadBuffer));
+//        int n = tempFile.fgets(fileReadBuffer, sizeof(fileReadBuffer));
+        int n = tempFile.readBytes(fileReadBuffer,sizeof(fileReadBuffer));
         if(lineNumber >= startLine){
             results += String(fileReadBuffer);
         }
