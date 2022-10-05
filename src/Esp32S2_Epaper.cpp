@@ -1,39 +1,24 @@
+/*Begining of Auto generated code by Atmel studio */
 #include <Arduino.h>
-//			               _____[]_____
-//			           VIN|     		   |GND
-//		            PA03|  		       |RST
-//		             GND|	    	  D0 |PA11 D3
-//	               3V3|		      D1 |PA10 D2
-//	A1      D16   PB02|		      D2 |PA08 D11  MOSI
-//	A4	    D19   PA05|		      D3 |PA09 D12  SCK
-//	A3	    D18   PA04|		      D4 |PA14 D28  *CS
-//	Key1    D33   PB09|		      D5 |PA15 D29  *DC
-//	Key2    D32   PB08|		      D6 |PA20 D6	  *RES
-//	key3    D15   PA02|		      D7 |PA21 D7   *BUSY
-//SCL *SCK	D9    PA17|		         |PA06 D20  CS2
-//	  MISO	D10   PA19|		         |PA07 D21
-//SDA *MOSI	D8    PA16|		         |PA23 D1
-//      		D24   PA18|		         |PA20 D0
-//	        		      |_MRK PINOUT_|
-//SERcom1 for debug
-//			            _____[]_____
-//KEY1  DAC  A0  D0|            |5V
-//KEY2	     A1  D1|    		    |GND
-//KEY3	     A2  D2|      	    |3V3
-//*CS	       A3  D3|	          |D10 A10  *MOSI 
-//*CS2  SDA  A4  D4|	          |D9  A9   *MISO   
-//*BUSY SCL  A5	 D5|	          |D8  A8   *SCK
-//*RES  TX   D18 D6|____XIAO____|D7  A7   RX     *DC
-//                    
-//See parasetup.h for pin assign //
-
 #include "parasetup.h"
 #include <SPI.h>
 #include "epd2in13b_V4.h"
 #include "imagedata.h"
 #include "epdpaint.h"
 #include "SDCard.h"
-#include "renderer.h"	
+#include "renderer.h"
+
+//     				_______[]______
+//      [SS] 3V3 14|			    |15 VBUS [SCK] -
+//  		  12 13|  		        |GND GND
+//    - {DIN} 11 10|	            |17 16   [MISO] [MOSI] 
+//    - {CLK}  9  8|		        |21 18   
+//    - {CS}   7  6|		        |34 33         SDA
+//	  - {DC}   5  4|		        |36 35   KEY1  SCL
+//    - {RST}  3  2|		        |38 37   KEY2  (RX)
+//    - {BUSY}EN  1|		        |40 39   KEY3  (TX)       
+//   		       |___Bottom VIEW__|
+// { } Epaper  // ( ) Uart // [ ] SD card //
 
 unsigned char image[4000];
 void SplitStringBy(String raw, String * parameters, int paraSize, char deliminater);
@@ -121,8 +106,8 @@ int CountRenderLines(const String & rawContent, const uint8_t maxChar = 35){
 
 void DrawNotesPage(const String & rawContent){
     int x = 10, y = 12;
-    Serial.println("Trying to draw notes page with");
-    Serial.println(rawContent);
+    Serial1.println("Trying to draw notes page with");
+    Serial1.println(rawContent);
     const uint8_t maxLines = 8;
     const uint8_t maxChar = 35;
     const uint8_t fontSize = 12;
@@ -163,7 +148,7 @@ void DrawNotesPage(const String & rawContent){
 String DrawFilesPage(String directories, int & selected, int & viewPortStart){
     int x = 0, y = 20;
     
-    //Serial.println("Page: Drawing Files page with");
+    //Serial1.println("Page: Drawing Files page with");
     const uint8_t fontSize = 12;
     const uint8_t FILE_DISPLAY_COUNT = 9;
     const uint8_t FILE_MAX_COUNT = 100;
@@ -213,10 +198,10 @@ String DrawFilesPage(String directories, int & selected, int & viewPortStart){
         options[i] = optionDisplays[viewPortStart + i];
         options[i].trim();
         
-        Serial.print("file ");
-        Serial.print(i);
-        Serial.print(": ");
-        Serial.println(options[i]);
+        Serial1.print("file ");
+        Serial1.print(i);
+        Serial1.print(": ");
+        Serial1.println(options[i]);
         
         if(options[i].length() >= maxChar){
             options[i] = options[i].substring(0, maxChar - 2) + "..";
@@ -231,7 +216,7 @@ String DrawFilesPage(String directories, int & selected, int & viewPortStart){
         paint.DrawStringAt(x + 8, y + (fontSize + 2) * onScreenSelect + 2, "->", &Font12, COLORED);
         current = options[onScreenSelect];
     }
-    Serial.println("Page: End of Files");
+    Serial1.println("Page: End of Files");
     return current;
 }
 
@@ -292,20 +277,20 @@ bool ReadPin(int toRead){//A0, A1, or A2
 
 void setup() {
     // put your setup code here, to run once:
-    Serial.begin(115200);
-    while (!Serial) {
-        ; // wait for serial port to connect. Needed for native USB port only
+    Serial1.begin(115200, SERIAL_8N1, RXD0, TXD0); 
+    while (!Serial1) {
+        ; // wait for Serial1 port to connect. Needed for native USB port only
     }
-    Serial.println("Initialization: ");
+    Serial1.println("Initialization: ");
     pinMode(KEY1, INPUT);
     pinMode(KEY2, INPUT);
     pinMode(KEY3, INPUT);
     if (epd.Init(FULL) != 0) {
-        Serial.print("e-Paper init failed, ");
+        Serial1.print("e-Paper init failed, ");
         return;
     }
     paint.SetRotate(ROTATE_270);
-    Serial.print("e-Paper starting, ");
+    Serial1.print("e-Paper starting, ");
     delay(500);
     //epd.ClearFrame();
     for(int i = 0; i <4000; i++)  {image[i]=WHITE;}    
@@ -314,7 +299,7 @@ void setup() {
         //Initialization is tried for three time
         if(sdCard.initialize()){
             sdInitialized = true;
-            Serial.println("SD Initialization Successful");
+            Serial1.println("SD Initialization Successful");
             break;
         }
         //wait for a few seconds before retrying
@@ -350,13 +335,13 @@ void loop() {
     bool pin1 = ReadPin(KEY2/*left*/);
     bool pin2 = ReadPin(KEY3/*Middle*/);
     if(pin1){
-        Serial.println("Pin Pressed: left");//Actually Middle
+        Serial1.println("Pin Pressed: left");//Actually Middle
     }
     if(pin2){
-        Serial.println("Pin Pressed: middle");//Actually right
+        Serial1.println("Pin Pressed: middle");//Actually right
     }
     if(pin3){
-        Serial.println("Pin Pressed: right");//Actually Left
+        Serial1.println("Pin Pressed: right");//Actually Left
     }
     
     epd.Init(PART); 
@@ -366,7 +351,7 @@ void loop() {
         isMenuOpen = true;
         selectedIndex = 0;
     }*/
-    Serial.println("Input Actions");
+    Serial1.println("Input Actions");
     
     //When menu is not open
     //First, draw an empty object

@@ -3,8 +3,7 @@
 #ifndef SD_CARD
 #define SD_CARD
 
-//#include "SdFat.h"
-#include <FFat.h>
+
 #include "FS.h"
 #include "SD.h"
 #include "SPI.h"
@@ -30,7 +29,7 @@ public:
     String readFile(String dirName, int startLine, int endLine);
 private:
     //SdFat SD;
-    int SD_CS_PIN = sdcardcs;
+    int SD_CS_PIN = SD_ss;
     int MAX_CHAR = 25;
     char fileReadBuffer[50];
     File currentFile;

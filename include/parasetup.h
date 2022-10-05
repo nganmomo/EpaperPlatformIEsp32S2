@@ -4,42 +4,42 @@
  * Created: 6/18/2022 7:11:25 AM
  *  Author: shiuwah ngan
  */ 
+//     				_______[]______
+//      [SS] 3V3 14|			    |15 VBUS [SCK] -
+//  		  12 13|  		        |GND GND
+//    - {DIN} 11 10|	            |17 16   [MISO] [MOSI] 
+//    - {CLK}  9  8|		        |21 18   
+//    - {CS}   7  6|		        |34 33         SDA
+//	  - {DC}   5  4|		        |36 35   KEY1  SCL
+//    - {RST}  3  2|		        |38 37   KEY2  (RX)
+//    - {BUSY}EN  1|		        |40 39   KEY3  (TX)       
+//   		       |___Bottom VIEW__|
+// { } Epaper  // ( ) Uart // [ ] SD card //
 
 
 #ifndef PARASETUP_H_
 #define PARASETUP_H_
+#define	esp32s2
 //#define XIAO
+#ifdef esp32s2
+#define KEY1			40
+#define KEY2			38
+#define KEY3			36
 
-#ifdef	XIAO
-#define KEY1			0
-#define KEY2			1
-#define KEY3			2
-#define RST_PIN         6		
-#define DC_PIN          7		
-#define CS_PIN          3		
-#define BUSY_PIN        5
-#define sdcardcs		4
-#else		//esp8266
-#define KEY1			33
-#define KEY2			32
-#define KEY3			35
+#define RXD0 			39
+#define TXD0 			37
 
-#define SCK_PIN  		13
-#define MOSI_PIN 		14
-#define CS_PIN          15	
-#define RST_PIN         26		
-#define DC_PIN          27			
-#define BUSY_PIN        25
+#define MOSI_PIN		10
+#define SCK_PIN  		8
+#define CS_PIN          6		
+#define DC_PIN          4			
+#define RST_PIN         2	
+#define BUSY_PIN        1
 
-//#define sdcardsck		4
-//#define sdcardmiso	16
-//#define sdcardmosi	17
-//#define sdcardcs		2
-
-#define sdcardsck		18
-#define sdcardmiso		19
-#define sdcardmosi		23
-#define sdcardcs		5
+#define SD_sck  		15
+#define SD_miso	    	17
+#define SD_mosi	    	16
+#define SD_ss			14
 
 #endif
 

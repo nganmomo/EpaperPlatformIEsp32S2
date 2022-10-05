@@ -5,15 +5,37 @@ SDCard::SDCard(int cspin){
     SD_CS_PIN = cspin;
 }
 bool SDCard::initialize(){
-    
-    //if(!SD.begin(SD_CS_PIN)){
-    if(!SD.begin(sdcardsck,sdcardmiso,sdcardmosi,sdcardcs)){
-        return false;
-    }else{
-        currentFile = SD.open("/");
-        return true;
+  SPIClass SDSPI(HSPI);
+  SDSPI.begin(SD_sck, SD_miso, SD_mosi, -1);
+  pinMode(SD_ss, OUTPUT);        //HSPI SS  set slave select pins as output
+
+  if (!SD.begin(SD_ss, SDSPI)) {
+    Serial1.println("Card Mount Failed");
+    return false;
+  }
+  //------------------------------------
+
+  File profile = SD.open("/foo.txt", FILE_READ);
+
+  if (!profile) {
+    Serial1.println("Opening file to read failed");
+    return false;
+  }
+
+  Serial1.println("File Content:");
+
+  while (profile.available()) {
+
+    while (profile.available()) {
+      Serial1.write(profile.read());
+      delay(50);
     }
+  }
+  return true;
 }
+
+
+
 String SDCard::getPath(){
     return currentDirectory;
 }
@@ -25,13 +47,13 @@ bool SDCard::makeDirectory(String dirName){
     }else{
         dir = currentDirectory + "/" + dirName;
     }
-    Serial.println("Trying to make a new directory at ");
-    Serial.print(dir);
+    Serial1.println("Trying to make a new directory at ");
+    Serial1.print(dir);
     if(SD.mkdir(dir)){
-        Serial.println("...successful");
+        Serial1.println("...successful");
         return true;
     }else{
-        Serial.println("...failed");
+        Serial1.println("...failed");
         return false;
     }
 }
@@ -43,13 +65,13 @@ bool SDCard::removeDirectory(String dirName){
     }else{
         dir = currentDirectory + "/" + dirName;
     }
-    Serial.println("Trying to remove a directory at ");
-    Serial.print(dir);
+    Serial1.println("Trying to remove a directory at ");
+    Serial1.print(dir);
     if(SD.rmdir(dir)){
-        Serial.println("...successful");
+        Serial1.println("...successful");
         return true;
     }else{
-        Serial.println("...failed");
+        Serial1.println("...failed");
         return false;
     }
 }
@@ -61,13 +83,13 @@ bool SDCard::deleteFile(String fileName){
     }else{
         dir = currentDirectory + "/" + fileName;
     }
-    Serial.println("SDCard: Trying to delete a file at ");
-    Serial.print(dir);
+    Serial1.println("SDCard: Trying to delete a file at ");
+    Serial1.print(dir);
     if(SD.remove(dir)){
-        Serial.println("SDCard: delete successful");
+        Serial1.println("SDCard: delete successful");
         return true;
     }else{
-        Serial.println("SDCard: delete failed");
+        Serial1.println("SDCard: delete failed");
         return false;
     }
 }
@@ -84,21 +106,21 @@ String SDCard::ListDirectory() {
         File entry =  currentFile.openNextFile();
         if (! entry) {
             // no more files
-            //Serial.print("No File to print");
+            //Serial1.print("No File to print");
             //temp += "..";
             break;
         }
-        //Serial.print(entry.name());
+        //Serial1.print(entry.name());
         temp += getFileName(entry);
         if (entry.isDirectory()) {
             //temp += "/";
-            //Serial.println("/");
+            //Serial1.println("/");
             //printDirectory(entry, numTabs + 1);
         } else {
             // files have sizes, directories do not
-            //Serial.print("\t\t");
+            //Serial1.print("\t\t");
             //temp += "\t\t";
-            //Serial.println(entry.size(), DEC);
+            //Serial1.println(entry.size(), DEC);
         }
         temp += "\n";
         entry.close();
@@ -107,24 +129,24 @@ String SDCard::ListDirectory() {
 }
 void SDCard::printDirectory() {
     currentFile = SD.open(currentDirectory);
-    Serial.println("SDCard: Printing Directory");
+    Serial1.println("SDCard: Printing Directory");
     while (true) {
         File entry =  currentFile.openNextFile();
         if (! entry) {
             // no more files
-            Serial.println("SDCard: No more Files to print");
+            Serial1.println("SDCard: No more Files to print");
             break;
         }
-        //Serial.print(entry.name());
-        Serial.print(getFileName(entry));
+        //Serial1.print(entry.name());
+        Serial1.print(getFileName(entry));
         
         if (entry.isDirectory()) {
-            Serial.println("/");
+            Serial1.println("/");
             //printDirectory(entry, numTabs + 1);
         } else {
             // files have sizes, directories do not
-            //Serial.print("\t\t");
-            //Serial.println(entry.size(), DEC);
+            //Serial1.print("\t\t");
+            //Serial1.println(entry.size(), DEC);
         }
         entry.close();
     }
@@ -137,24 +159,24 @@ void SDCard::printDirectory(File dir, int numTabs) {
             break;
         }
         for (uint8_t i = 0; i < numTabs; i++) {
-            Serial.print('\t');
+            Serial1.print('\t');
         }
-       // Serial.print(entry.name());
+       // Serial1.print(entry.name());
         
         if (entry.isDirectory()) {
-            Serial.println("/");
+            Serial1.println("/");
             //printDirectory(entry, numTabs + 1);
         } else {
             // files have sizes, directories do not
-            Serial.print("\t\t");
-            //Serial.println(entry.size(), DEC);
+            Serial1.print("\t\t");
+            //Serial1.println(entry.size(), DEC);
         }
         entry.close();
     }
 }
 bool SDCard::enter(String dirName){
     String dir = currentDirectory;
-    //Serial.println(currentDirectory);
+    //Serial1.println(currentDirectory);
     if(currentDirectory == "/"){
         dir = currentDirectory + dirName;
     }else if(dirName == ".."){
@@ -176,8 +198,8 @@ bool SDCard::enter(String dirName){
     else{
         dir = currentDirectory + "/" + dirName;
     }
-    //Serial.print("Now trying to access directory: ");
-    //Serial.println(dir);
+    //Serial1.print("Now trying to access directory: ");
+    //Serial1.println(dir);
     currentFile = SD.open(dir);
     if(!currentFile){
         return false;
@@ -187,8 +209,8 @@ bool SDCard::enter(String dirName){
         //printDirectory(currentFile, 0);
         ;
     }else{
-        //Serial.println(getFileName(currentFile));
-        //Serial.println(" Open Successful");
+        //Serial1.println(getFileName(currentFile));
+        //Serial1.println(" Open Successful");
         ;
     }
     return true;//??
